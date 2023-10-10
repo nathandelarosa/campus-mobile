@@ -21,7 +21,6 @@ class MapQuery {
   double? _defaultLong = -117.2362059310055;
 
   /// Create hook that retrieves and provides map location data in a MapSearchModel schema
-  /// @return UseQueryResult - flutter hook that updates asynchronously
   UseQueryResult<List<MapSearchModel>, dynamic> useFetchMapSearchModel() {
     return useQuery(
       ['mapSearchModel'],
@@ -48,7 +47,6 @@ class MapQuery {
   }
 
   /// Create hook that contains an instance of SearchBarController
-  /// @return UseQueryResult - flutter hook that updates asynchronously
   UseQueryResult<TextEditingController, dynamic>
       useFetchMapSearchBarController() {
     return useQuery(
@@ -63,7 +61,6 @@ class MapQuery {
   }
 
   /// Create hook that contains an instance of Coordinates?
-  /// @return UseQueryResult - flutter hook that updates asynchronously
   UseQueryResult<Coordinates?, dynamic> useFetchMapCoordinates() {
     return useQuery(
       ['mapCoordinates'],
@@ -77,7 +74,6 @@ class MapQuery {
   }
 
   /// Create hook that contains an instance of Markers
-  /// @return UseQueryResult - flutter hook that updates asynchronously
   UseQueryResult<Map<MarkerId, Marker>, dynamic> useFetchMapMarkers() {
     return useQuery(
       ['mapMarkers'],
@@ -91,7 +87,6 @@ class MapQuery {
   }
 
   /// Create hook that contains an instance of GoogleMapController?
-  /// @return UseQueryResult - flutter hook that updates asynchronously
   UseQueryResult<GoogleMapController?, dynamic> useFetchMapController() {
     return useQuery(
       ['mapController'],
@@ -105,7 +100,6 @@ class MapQuery {
   }
 
   /// Create hook that contains the searchHistory list
-  /// @return UseQueryResult - flutter hook that updates asynchronously
   UseQueryResult<List<String>, dynamic> useFetchMapHistory() {
     return useQuery(
       ['mapHistory'],
@@ -118,6 +112,7 @@ class MapQuery {
     );
   }
 
+  /// Creates a marker from the location's index chosen by user then adds it to markers hook
   void addMarker(int listIndex) {
     final queryClient = useQueryClient();
     final _mapSearchModels = useFetchMapSearchModel().data!;
@@ -140,6 +135,7 @@ class MapQuery {
     updateMapPosition();
   }
 
+  /// Moves the camera to the location
   void updateMapPosition() {
     final _markers = useFetchMapMarkers().data!;
     final _mapController = useFetchMapController().data;
@@ -158,6 +154,7 @@ class MapQuery {
     }
   }
 
+  /// Sort the list of locations by there distances from the user
   void reorderLocations() {
     final queryClient = useQueryClient();
 
@@ -173,6 +170,7 @@ class MapQuery {
     });
   }
 
+  /// Remove the given item from the search history
   void removeFromSearchHistory(String item) {
     final queryClient = useQueryClient();
 
@@ -182,23 +180,29 @@ class MapQuery {
     });
   }
 
+  /// Calculate the distances of each location and record them in their respective MapSearchModels
   void populateDistances() {
+    final queryClient = useQueryClient();
     final _coordinates = useFetchMapCoordinates().data;
-    final _mapSearchModels = useFetchMapSearchModel().data!;
 
     double? latitude =
         _coordinates!.lat != null ? _coordinates.lat : _defaultLat;
     double? longitude =
         _coordinates.lon != null ? _coordinates.lon : _defaultLong;
-    for (MapSearchModel model in _mapSearchModels) {
-      if (model.mkrLat != null && model.mkrLong != null) {
-        var distance = calculateDistance(
-            latitude!, longitude!, model.mkrLat!, model.mkrLong!);
-        model.distance = distance as double?;
+    queryClient.setQueryData<List<MapSearchModel>>(['mapSearchModel'],
+        (previous) {
+      for (MapSearchModel model in previous!) {
+        if (model.mkrLat != null && model.mkrLong != null) {
+          var distance = calculateDistance(
+              latitude!, longitude!, model.mkrLat!, model.mkrLong!);
+          model.distance = distance as double?;
+        }
       }
-    }
+      return previous;
+    });
   }
 
+  /// Calculate the distance from one coordinate to another
   num calculateDistance(double lat1, double lng1, double lat2, double lng2) {
     var p = 0.017453292519943295;
     var c = cos;
@@ -208,6 +212,7 @@ class MapQuery {
     return 12742 * asin(sqrt(a)) * 0.621371;
   }
 
+  /// Updates the search history with the given location
   void updateSearchHistory(String location) {
     final _searchHistory = useFetchMapHistory().data!;
     final queryClient = useQueryClient();
@@ -227,5 +232,26 @@ class MapQuery {
         return previous;
       });
     }
+  }
+
+  /// Clears the searchBarController
+  void clearSearchBarController() {
+    final queryClient = useQueryClient();
+
+    queryClient.setQueryData<TextEditingController>(['mapSearchBarController'],
+        (previous) {
+      previous!.clear();
+      return previous;
+    });
+  }
+
+  /// Clears the markers
+  void clearMarkers() {
+    final queryClient = useQueryClient();
+
+    queryClient.setQueryData<Map<MarkerId, Marker>>(['mapMarkers'], (previous) {
+      previous!.clear();
+      return previous;
+    });
   }
 }
