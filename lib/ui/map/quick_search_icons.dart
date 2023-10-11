@@ -1,8 +1,9 @@
 import 'package:campus_mobile_experimental/core/providers/map.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 
-class QuickSearchIcons extends StatelessWidget {
+class QuickSearchIcons extends HookWidget {
   const QuickSearchIcons({
     Key? key,
   }) : super(key: key);
