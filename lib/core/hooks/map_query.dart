@@ -245,12 +245,34 @@ class MapQuery {
     });
   }
 
+  /// Sets searchBarController.text
+  void setSearchBarController(String text) {
+    final queryClient = useQueryClient();
+
+    queryClient.setQueryData<TextEditingController>(['mapSearchBarController'],
+        (previous) {
+      previous!.text = text;
+      return previous;
+    });
+  }
+
   /// Clears the markers
   void clearMarkers() {
     final queryClient = useQueryClient();
 
     queryClient.setQueryData<Map<MarkerId, Marker>>(['mapMarkers'], (previous) {
       previous!.clear();
+      return previous;
+    });
+  }
+
+  /// Sets mapController
+  void setMapController(GoogleMapController? controller) {
+    final queryClient = useQueryClient();
+
+    queryClient.setQueryData<GoogleMapController?>(['mapController'],
+        (previous) {
+      previous = controller;
       return previous;
     });
   }
