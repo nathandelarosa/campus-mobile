@@ -14,6 +14,13 @@ class QuickSearchIcons extends HookWidget {
   Widget build(BuildContext context) {
     final mapQuery = MapQuery();
     final queryClient = useQueryClient();
+    final sbcHook = mapQuery.useFetchMapSearchBarController();
+    final coordsHook = mapQuery.useFetchMapCoordinates();
+    final markersHook = mapQuery.useFetchMapMarkers();
+    final mcHook = mapQuery.useFetchMapController();
+    final shHook = mapQuery.useFetchMapHistory();
+    final msmHook = mapQuery.useFetchMapSearchModel(queryClient, sbcHook.data!,
+        coordsHook.data, markersHook.data, mcHook.data, shHook.data);
 
     return Card(
       margin: EdgeInsets.all(5),
@@ -28,8 +35,7 @@ class QuickSearchIcons extends HookWidget {
               text: 'Parking',
               onPressed: () {
                 mapQuery.setSearchBarController('Parking', queryClient);
-                Provider.of<MapsDataProvider>(context, listen: false)
-                    .fetchLocations();
+                msmHook.refetch();
                 Navigator.pop(context);
               },
             ),
@@ -38,8 +44,7 @@ class QuickSearchIcons extends HookWidget {
               text: 'COVID Tests',
               onPressed: () {
                 mapQuery.setSearchBarController('COVID Test Kits', queryClient);
-                Provider.of<MapsDataProvider>(context, listen: false)
-                    .fetchLocations();
+                msmHook.refetch();
                 Navigator.pop(context);
               },
             ),
@@ -48,8 +53,7 @@ class QuickSearchIcons extends HookWidget {
               text: 'Hydration',
               onPressed: () {
                 mapQuery.setSearchBarController('Hydration', queryClient);
-                Provider.of<MapsDataProvider>(context, listen: false)
-                    .fetchLocations();
+                msmHook.refetch();
                 Navigator.pop(context);
               },
             ),
@@ -58,8 +62,7 @@ class QuickSearchIcons extends HookWidget {
               text: 'ATM',
               onPressed: () {
                 mapQuery.setSearchBarController('ATM', queryClient);
-                Provider.of<MapsDataProvider>(context, listen: false)
-                    .fetchLocations();
+                msmHook.refetch();
                 Navigator.pop(context);
               },
             ),

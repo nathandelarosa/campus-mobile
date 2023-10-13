@@ -25,7 +25,6 @@ class MapQuery {
       QueryClient queryClient,
       TextEditingController searchBarController,
       Coordinates? _coordinates,
-      List<MapSearchModel> _mapSearchModels,
       Map<MarkerId, Marker>? _markers,
       GoogleMapController? _mapController,
       List<String>? _searchHistory) {
@@ -39,7 +38,7 @@ class MapQuery {
             baseEndpoint + '?query=' + searchBarController.text + '&region=0');
 
         /// parse data
-        final mapSearchModel = mapSearchModelFromJson(_response!);
+        final _mapSearchModels = mapSearchModelFromJson(_response!);
 
         /// make necessary changes for map functionality
         populateDistances(queryClient, _coordinates);
@@ -48,7 +47,7 @@ class MapQuery {
         updateSearchHistory(
             searchBarController.text, queryClient, _searchHistory);
 
-        return mapSearchModel;
+        return _mapSearchModels;
       },
     );
   }
