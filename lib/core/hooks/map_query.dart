@@ -31,8 +31,6 @@ class MapQuery {
     return useQuery(
       ['mapSearchModel'],
       () async {
-        // final sbcHook = useFetchMapSearchBarController();
-
         /// fetch data
         String? _response = await _networkHelper.fetchData(
             baseEndpoint + '?query=' + searchBarController.text + '&region=0');

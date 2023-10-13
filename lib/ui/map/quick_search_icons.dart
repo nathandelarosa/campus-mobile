@@ -12,6 +12,7 @@ class QuickSearchIcons extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Hooks for map feature
     final mapQuery = MapQuery();
     final queryClient = useQueryClient();
     final sbcHook = mapQuery.useFetchMapSearchBarController();

@@ -16,6 +16,7 @@ class MyLocationButton extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Hooks for map feature
     final mapQuery = MapQuery();
     final mapCoordinatesHook = mapQuery.useFetchMapCoordinates();
 

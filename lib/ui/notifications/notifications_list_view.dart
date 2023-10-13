@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:campus_mobile_experimental/app_constants.dart';
+import 'package:campus_mobile_experimental/core/hooks/map_query.dart';
+import 'package:campus_mobile_experimental/core/models/map.dart';
 import 'package:campus_mobile_experimental/core/models/notifications.dart';
 import 'package:campus_mobile_experimental/core/providers/bottom_nav.dart';
 import 'package:campus_mobile_experimental/core/providers/map.dart';
@@ -8,15 +10,28 @@ import 'package:campus_mobile_experimental/core/providers/messages.dart';
 import 'package:campus_mobile_experimental/core/providers/notifications_freefood.dart';
 import 'package:campus_mobile_experimental/ui/notifications/notifications_freefood.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:fquery/fquery.dart';
 import 'package:provider/provider.dart';
 import 'package:uni_links2/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class NotificationsListView extends StatelessWidget {
+class NotificationsListView extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    initUniLinks(context);
+    // Hooks for map feature
+    final mapQuery = MapQuery();
+    final queryClient = useQueryClient();
+    final sbcHook = mapQuery.useFetchMapSearchBarController();
+    final coordsHook = mapQuery.useFetchMapCoordinates();
+    final markersHook = mapQuery.useFetchMapMarkers();
+    final mcHook = mapQuery.useFetchMapController();
+    final shHook = mapQuery.useFetchMapHistory();
+    final msmHook = mapQuery.useFetchMapSearchModel(queryClient, sbcHook.data!,
+        coordsHook.data, markersHook.data, mcHook.data, shHook.data);
+
+    initUniLinks(context, queryClient, mapQuery, msmHook);
     return RefreshIndicator(
       child: buildListView(context),
       onRefresh: () => Provider.of<MessagesDataProvider>(context, listen: false)
@@ -83,7 +98,11 @@ class NotificationsListView extends StatelessWidget {
     );
   }
 
-  Future<Null> initUniLinks(BuildContext context) async {
+  Future<Null> initUniLinks(
+      BuildContext context,
+      QueryClient queryClient,
+      MapQuery mapQuery,
+      UseQueryResult<List<MapSearchModel>, dynamic> msmHook) async {
     // deep links are received by this method
     // the specific host needs to be added in AndroidManifest.xml and Info.plist
     // currently, this method handles executing custom map query
@@ -94,10 +113,8 @@ class NotificationsListView extends StatelessWidget {
         var uri = Uri.dataFromString(link);
         var query = uri.queryParameters['query']!;
         // redirect query to maps tab and search with query
-        Provider.of<MapsDataProvider>(context, listen: false)
-            .searchBarController
-            .text = query;
-        Provider.of<MapsDataProvider>(context, listen: false).fetchLocations();
+        mapQuery.setSearchBarController(query, queryClient);
+        msmHook.refetch();
         Provider.of<BottomNavigationBarProvider>(context, listen: false)
             .currentIndex = NavigatorConstants.MapTab;
         // received deeplink, cancel stream to prevent memory leaks
