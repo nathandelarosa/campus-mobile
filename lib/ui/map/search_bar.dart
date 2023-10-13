@@ -1,14 +1,20 @@
 import 'package:campus_mobile_experimental/core/providers/map.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 
-class SearchBar extends StatelessWidget {
+import '../../core/hooks/map_query.dart';
+
+class SearchBar extends HookWidget {
   const SearchBar({
     Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final mapQuery = MapQuery();
+    final sbcHook = mapQuery.useFetchMapSearchBarController();
+
     return Card(
       margin: EdgeInsets.all(5),
       child: Row(
@@ -27,10 +33,7 @@ class SearchBar extends StatelessWidget {
               textInputAction: TextInputAction.search,
               onChanged: (text) {},
               onSubmitted: (text) {
-                if (Provider.of<MapsDataProvider>(context, listen: false)
-                    .searchBarController
-                    .text
-                    .isNotEmpty) {
+                if (sbcHook.data!.text.isNotEmpty) {
                   // Don't fetch on empty text field
                   Provider.of<MapsDataProvider>(context, listen: false)
                       .fetchLocations(); // Text doesn't need to be sent over because it's already in the controller

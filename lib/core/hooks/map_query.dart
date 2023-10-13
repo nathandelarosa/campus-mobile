@@ -21,25 +21,32 @@ class MapQuery {
   double? _defaultLong = -117.2362059310055;
 
   /// Create hook that retrieves and provides map location data in a MapSearchModel schema
-  UseQueryResult<List<MapSearchModel>, dynamic> useFetchMapSearchModel() {
+  UseQueryResult<List<MapSearchModel>, dynamic> useFetchMapSearchModel(
+      QueryClient queryClient,
+      TextEditingController searchBarController,
+      Coordinates? _coordinates,
+      List<MapSearchModel> _mapSearchModels,
+      Map<MarkerId, Marker>? _markers,
+      GoogleMapController? _mapController,
+      List<String>? _searchHistory) {
     return useQuery(
       ['mapSearchModel'],
       () async {
-        final sbcHook = useFetchMapSearchBarController();
+        // final sbcHook = useFetchMapSearchBarController();
 
         /// fetch data
-        List<MapSearchModel> mapSearchModels = [];
         String? _response = await _networkHelper.fetchData(
-            baseEndpoint + '?query=' + sbcHook.data!.text + '&region=0');
+            baseEndpoint + '?query=' + searchBarController.text + '&region=0');
 
         /// parse data
         final mapSearchModel = mapSearchModelFromJson(_response!);
 
         /// make necessary changes for map functionality
-        populateDistances();
-        reorderLocations();
-        addMarker(0);
-        updateSearchHistory(sbcHook.data!.text);
+        populateDistances(queryClient, _coordinates);
+        reorderLocations(queryClient);
+        addMarker(0, queryClient, _mapSearchModels, _markers, _mapController);
+        updateSearchHistory(
+            searchBarController.text, queryClient, _searchHistory);
 
         return mapSearchModel;
       },
@@ -113,9 +120,14 @@ class MapQuery {
   }
 
   /// Creates a marker from the location's index chosen by user then adds it to markers hook
-  void addMarker(int listIndex) {
-    final queryClient = useQueryClient();
-    final _mapSearchModels = useFetchMapSearchModel().data!;
+  void addMarker(
+      int listIndex,
+      QueryClient queryClient,
+      List<MapSearchModel> _mapSearchModels,
+      Map<MarkerId, Marker>? _markers,
+      GoogleMapController? _mapController) {
+    // final queryClient = useQueryClient();
+    // final _mapSearchModels = useFetchMapSearchModel().data!;
 
     final Marker marker = Marker(
       markerId: MarkerId(_mapSearchModels[listIndex].mkrMarkerid.toString()),
@@ -132,15 +144,16 @@ class MapQuery {
       return previous;
     });
 
-    updateMapPosition();
+    updateMapPosition(_markers, _mapController);
   }
 
   /// Moves the camera to the location
-  void updateMapPosition() {
-    final _markers = useFetchMapMarkers().data!;
-    final _mapController = useFetchMapController().data;
+  void updateMapPosition(
+      Map<MarkerId, Marker>? _markers, GoogleMapController? _mapController) {
+    // final _markers = useFetchMapMarkers().data!;
+    // final _mapController = useFetchMapController().data;
 
-    if (_markers.isNotEmpty && _mapController != null) {
+    if (_markers!.isNotEmpty && _mapController != null) {
       _mapController
           .animateCamera(
               CameraUpdate.newLatLng(_markers.values.toList()[0].position))
@@ -155,8 +168,8 @@ class MapQuery {
   }
 
   /// Sort the list of locations by there distances from the user
-  void reorderLocations() {
-    final queryClient = useQueryClient();
+  void reorderLocations(QueryClient queryClient) {
+    // final queryClient = useQueryClient();
 
     queryClient.setQueryData<List<MapSearchModel>>(['mapSearchModel'],
         (previous) {
@@ -171,8 +184,8 @@ class MapQuery {
   }
 
   /// Remove the given item from the search history
-  void removeFromSearchHistory(String item) {
-    final queryClient = useQueryClient();
+  void removeFromSearchHistory(String item, QueryClient queryClient) {
+    // final queryClient = useQueryClient();
 
     queryClient.setQueryData<List<String>>(['mapHistory'], (previous) {
       previous!.remove(item);
@@ -181,9 +194,9 @@ class MapQuery {
   }
 
   /// Calculate the distances of each location and record them in their respective MapSearchModels
-  void populateDistances() {
-    final queryClient = useQueryClient();
-    final _coordinates = useFetchMapCoordinates().data;
+  void populateDistances(QueryClient queryClient, Coordinates? _coordinates) {
+    // final queryClient = useQueryClient();
+    // final _coordinates = useFetchMapCoordinates().data;
 
     double? latitude =
         _coordinates!.lat != null ? _coordinates.lat : _defaultLat;
@@ -213,11 +226,12 @@ class MapQuery {
   }
 
   /// Updates the search history with the given location
-  void updateSearchHistory(String location) {
-    final _searchHistory = useFetchMapHistory().data!;
-    final queryClient = useQueryClient();
+  void updateSearchHistory(
+      String location, QueryClient queryClient, List<String>? _searchHistory) {
+    // final _searchHistory = useFetchMapHistory().data!;
+    // final queryClient = useQueryClient();
 
-    if (!_searchHistory.contains(location)) {
+    if (!_searchHistory!.contains(location)) {
       // Check to see if this search is already in history...
       queryClient.setQueryData<List<String>>(['mapHistory'], (previous) {
         previous!.add(location); // ...If it is not, add it...
@@ -235,8 +249,8 @@ class MapQuery {
   }
 
   /// Clears the searchBarController
-  void clearSearchBarController() {
-    final queryClient = useQueryClient();
+  void clearSearchBarController(QueryClient queryClient) {
+    // final queryClient = useQueryClient();
 
     queryClient.setQueryData<TextEditingController>(['mapSearchBarController'],
         (previous) {
@@ -246,8 +260,8 @@ class MapQuery {
   }
 
   /// Sets searchBarController.text
-  void setSearchBarController(String text) {
-    final queryClient = useQueryClient();
+  void setSearchBarController(String text, QueryClient queryClient) {
+    // final queryClient = useQueryClient();
 
     queryClient.setQueryData<TextEditingController>(['mapSearchBarController'],
         (previous) {
@@ -257,8 +271,8 @@ class MapQuery {
   }
 
   /// Clears the markers
-  void clearMarkers() {
-    final queryClient = useQueryClient();
+  void clearMarkers(QueryClient queryClient) {
+    // final queryClient = useQueryClient();
 
     queryClient.setQueryData<Map<MarkerId, Marker>>(['mapMarkers'], (previous) {
       previous!.clear();
@@ -267,8 +281,9 @@ class MapQuery {
   }
 
   /// Sets mapController
-  void setMapController(GoogleMapController? controller) {
-    final queryClient = useQueryClient();
+  void setMapController(
+      GoogleMapController? controller, QueryClient queryClient) {
+    // final queryClient = useQueryClient();
 
     queryClient.setQueryData<GoogleMapController?>(['mapController'],
         (previous) {

@@ -1,6 +1,8 @@
+import 'package:campus_mobile_experimental/core/hooks/map_query.dart';
 import 'package:campus_mobile_experimental/core/providers/map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fquery/fquery.dart';
 import 'package:provider/provider.dart';
 
 class QuickSearchIcons extends HookWidget {
@@ -10,6 +12,9 @@ class QuickSearchIcons extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mapQuery = MapQuery();
+    final queryClient = useQueryClient();
+
     return Card(
       margin: EdgeInsets.all(5),
       child: Padding(
@@ -22,9 +27,7 @@ class QuickSearchIcons extends HookWidget {
               icon: Icons.local_parking,
               text: 'Parking',
               onPressed: () {
-                Provider.of<MapsDataProvider>(context, listen: false)
-                    .searchBarController
-                    .text = 'Parking';
+                mapQuery.setSearchBarController('Parking', queryClient);
                 Provider.of<MapsDataProvider>(context, listen: false)
                     .fetchLocations();
                 Navigator.pop(context);
@@ -34,9 +37,7 @@ class QuickSearchIcons extends HookWidget {
               icon: Icons.coronavirus_outlined,
               text: 'COVID Tests',
               onPressed: () {
-                Provider.of<MapsDataProvider>(context, listen: false)
-                    .searchBarController
-                    .text = 'COVID Test Kits';
+                mapQuery.setSearchBarController('COVID Test Kits', queryClient);
                 Provider.of<MapsDataProvider>(context, listen: false)
                     .fetchLocations();
                 Navigator.pop(context);
@@ -46,9 +47,7 @@ class QuickSearchIcons extends HookWidget {
               icon: Icons.local_drink,
               text: 'Hydration',
               onPressed: () {
-                Provider.of<MapsDataProvider>(context, listen: false)
-                    .searchBarController
-                    .text = 'Hydration';
+                mapQuery.setSearchBarController('Hydration', queryClient);
                 Provider.of<MapsDataProvider>(context, listen: false)
                     .fetchLocations();
                 Navigator.pop(context);
@@ -58,9 +57,7 @@ class QuickSearchIcons extends HookWidget {
               icon: Icons.local_atm,
               text: 'ATM',
               onPressed: () {
-                Provider.of<MapsDataProvider>(context, listen: false)
-                    .searchBarController
-                    .text = 'ATM';
+                mapQuery.setSearchBarController('ATM', queryClient);
                 Provider.of<MapsDataProvider>(context, listen: false)
                     .fetchLocations();
                 Navigator.pop(context);
