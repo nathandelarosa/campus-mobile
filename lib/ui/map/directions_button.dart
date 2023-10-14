@@ -1,11 +1,14 @@
 import 'package:campus_mobile_experimental/app_constants.dart';
+import 'package:campus_mobile_experimental/core/hooks/map_query.dart';
 import 'package:campus_mobile_experimental/core/providers/map.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:fquery/fquery.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class DirectionsButton extends StatelessWidget {
+class DirectionsButton extends HookWidget {
   const DirectionsButton({
     Key? key,
     required GoogleMapController? mapController,
@@ -16,6 +19,12 @@ class DirectionsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Hooks for map feature
+    final mapQuery = MapQuery();
+    final sbcHook = mapQuery.useFetchMapSearchBarController();
+    final coordsHook = mapQuery.useFetchMapCoordinates();
+    final markersHook = mapQuery.useFetchMapMarkers();
+
     return FloatingActionButton(
       heroTag: "directions",
       child: Icon(
@@ -24,26 +33,16 @@ class DirectionsButton extends StatelessWidget {
       ),
       backgroundColor: Colors.white,
       onPressed: () {
-        if (Provider.of<MapsDataProvider>(context, listen: false)
-                    .coordinates!
-                    .lat ==
-                null ||
-            Provider.of<MapsDataProvider>(context, listen: false)
-                    .coordinates!
-                    .lon ==
-                null) {
+        if (coordsHook.data!.lat == null || coordsHook.data!.lon == null) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(
                 'Please turn your location on in order to use this feature.'),
             duration: Duration(seconds: 3),
           ));
         } else {
-          String locationQuery =
-              Provider.of<MapsDataProvider>(context, listen: false)
-                  .searchBarController
-                  .text;
+          String locationQuery = sbcHook.data!.text;
           if (locationQuery.isNotEmpty) {
-            getDirections(context);
+            getDirections(context, markersHook.data!);
           } else {
             Navigator.pushNamed(context, RoutePaths.MapSearch);
           }
@@ -52,12 +51,9 @@ class DirectionsButton extends StatelessWidget {
     );
   }
 
-  Future<void> getDirections(BuildContext context) async {
-    LatLng currentPin = Provider.of<MapsDataProvider>(context, listen: false)
-        .markers
-        .values
-        .toList()[0]
-        .position;
+  Future<void> getDirections(
+      BuildContext context, Map<MarkerId, Marker> markers) async {
+    LatLng currentPin = markers.values.toList()[0].position;
     double lat = currentPin.latitude;
     double lon = currentPin.longitude;
 
