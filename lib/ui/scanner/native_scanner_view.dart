@@ -9,6 +9,7 @@ import 'package:flutter_scandit_plugin/flutter_scandit_plugin.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:campus_mobile_experimental/core/hooks/scanner_message_query.dart';
 
 class ScanditScanner extends StatefulWidget {
   _ScanditScannerState createState() => _ScanditScannerState();

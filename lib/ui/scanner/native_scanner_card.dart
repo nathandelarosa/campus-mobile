@@ -1,4 +1,5 @@
 import 'package:campus_mobile_experimental/app_constants.dart';
+import 'package:campus_mobile_experimental/core/models/scanner_message.dart';
 import 'package:campus_mobile_experimental/core/providers/bottom_nav.dart';
 import 'package:campus_mobile_experimental/core/providers/scanner.dart';
 import 'package:campus_mobile_experimental/core/providers/scanner_message.dart';
@@ -6,28 +7,36 @@ import 'package:campus_mobile_experimental/core/providers/user.dart';
 import 'package:campus_mobile_experimental/ui/common/card_container.dart';
 import 'package:campus_mobile_experimental/ui/navigator/top.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
+import 'package:campus_mobile_experimental/core/hooks/scanner_message_query.dart';
 
 const String cardId = 'NativeScanner';
 
-class NativeScannerCard extends StatelessWidget {
+class NativeScannerCard extends HookWidget {
   @override
   Widget build(BuildContext context) {
+    final accessToken = Provider.of<UserDataProvider>(context, listen: false)
+        .authenticationModel!
+        .accessToken!;
+
+    final scannerMessage = useFetchScannerMessageModel(accessToken);
+    debugPrint("Call Hook Once");
+
     return CardContainer(
       active: true,
       hide: () => null,
-      reload: () =>
-          Provider.of<ScannerMessageDataProvider>(context, listen: false)
-              .fetchData(),
-      isLoading: Provider.of<ScannerMessageDataProvider>(context).isLoading,
+      reload: () => scannerMessage.refetch(),
+      isLoading: scannerMessage.isFetching,
       titleText: CardTitleConstants.titleMap[cardId],
-      errorText: null,
+      errorText: scannerMessage.isError ? "" : null,
       child: () => buildCardContent(context),
       actionButtons: [buildActionButton(context)],
       hideMenu: false,
     );
   }
 
+//look at weather file
   Widget buildCardContent(BuildContext context) {
     return GestureDetector(
       onTap: () {
