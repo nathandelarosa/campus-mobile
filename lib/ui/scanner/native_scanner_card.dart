@@ -30,14 +30,15 @@ class NativeScannerCard extends HookWidget {
       isLoading: scannerMessage.isFetching,
       titleText: CardTitleConstants.titleMap[cardId],
       errorText: scannerMessage.isError ? "" : null,
-      child: () => buildCardContent(context),
+      child: () => buildCardContent(scannerMessage.data!, context),
       actionButtons: [buildActionButton(context)],
       hideMenu: false,
     );
   }
 
 //look at weather file
-  Widget buildCardContent(BuildContext context) {
+  Widget buildCardContent(
+      ScannerMessageModel? scannerMessageModel, BuildContext context) {
     return GestureDetector(
       onTap: () {
         getActionButtonNavigateRoute(context);
@@ -64,7 +65,7 @@ class NativeScannerCard extends HookWidget {
                   getCardContentText(context),
                   textAlign: TextAlign.left,
                 ),
-                getMessageWidget(context),
+                getMessageWidget(scannerMessageModel, context),
               ],
             ),
           ),
@@ -100,7 +101,8 @@ class NativeScannerCard extends HookWidget {
         : ButtonText.SignIn;
   }
 
-  Widget getMessageWidget(BuildContext context) {
+  Widget getMessageWidget(
+      ScannerMessageModel? scannerMessageModel, BuildContext context) {
     if (Provider.of<UserDataProvider>(context, listen: false).isLoggedIn) {
       String? myRecentScanTime =
           Provider.of<ScannerMessageDataProvider>(context, listen: false)
