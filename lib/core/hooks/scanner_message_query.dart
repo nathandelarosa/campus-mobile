@@ -22,6 +22,6 @@ UseQueryResult<ScannerMessageModel, dynamic> useFetchScannerMessageModel(
 
     //parse data, decoding '_response'  from json
     final data = scannerMessageModelFromJson(_response);
-    return Future.value(data);
+    return data;
   });
 }
